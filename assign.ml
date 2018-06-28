@@ -2,7 +2,17 @@ open Syntax
 
 let unify t t' : my_sub = []
 
-let rec subst_id ids ty =
+let rec lookup env var = match env with
+  | [] ->
+      None
+  | (id, sch) :: rest ->
+      if id == var then
+        Some sch
+      else
+        lookup rest var
+;;
+
+let subst_id ids ty =
   let rec subst_func sc en = match sc with
     | MyTVar x ->
         let (i, i') = en in
@@ -19,21 +29,20 @@ let rec subst_id ids ty =
   List.fold_left subst_func ty ids
 ;;
 
-let tvar_dict idx =
-  let prim =
-    ["a"; "b"; "c"; "d"; "e"; "f"; "g"; "h"; "i"; "j"; "k"; "l"; "m";
-     "n"; "o"; "p"; "q"; "r"; "s"; "t"; "u"; "v"; "w"; "x"; "y"; "z"]
-  in
-  let prim_len = List.length prim in
-  let alpha = List.nth prim (idx mod prim_len) in
-  if idx < prim_len then
-    "'" ^ alpha
-  else
-    "'" ^ alpha ^ (idx / prim_len |> string_of_int)
-;;
-
 (* find a type variable which is not bounded in the environment *)
 let new_tvar a =
+  let tvar_dict idx =
+    let prim =
+      ["a"; "b"; "c"; "d"; "e"; "f"; "g"; "h"; "i"; "j"; "k"; "l"; "m";
+       "n"; "o"; "p"; "q"; "r"; "s"; "t"; "u"; "v"; "w"; "x"; "y"; "z"]
+    in
+    let prim_len = List.length prim in
+    let alpha = List.nth prim (idx mod prim_len) in
+    if idx < prim_len then
+      "'" ^ alpha
+    else
+      "'" ^ alpha ^ (idx / prim_len |> string_of_int)
+  in
   let rec dive_dict idx = function
     | [] -> tvar_dict idx
     | (i, s) :: iss ->
@@ -60,8 +69,8 @@ let new_tvar a =
 
 (* val assign : my_env -> my_expr -> my_scheme *)
 let rec assign a = function
-  | MyVar(x) ->
-      let s = lookup a x in
+  | MyVar(x) when lookup a x != None ->
+      let Some(s) = lookup a x in
       let t =
         let rec annotate acc = function
           | MyType t -> subst_id acc t
