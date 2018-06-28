@@ -1,4 +1,4 @@
-Hindley-Milner type inference system
+Hindley-Milner type system
 ============================================================
 
 WIP
