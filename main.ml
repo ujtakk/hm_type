@@ -1,3 +1,6 @@
+open Syntax
+open Infer
+
 let () =
   let env = [("x", MyType(MyBool))] in
   let expr = MyVar("x") in

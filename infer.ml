@@ -1,3 +1,6 @@
+open Syntax
+open Assign
+
 (* my_env -> my_expr -> my_scheme -> bool *)
 let rec infer a e s : bool =
   Printf.printf "%s |- %s : %s\n" (show_env a) (show_expr e) (show_scheme s);
