@@ -7,7 +7,7 @@ let rec infer a e s : bool =
   match e, s with
   | MyVar(x), s when List.mem (x, s) a ->
       true
-  | e, s' when let s = assign a e in s > s' ->
+  | e, s' when let (sub, sch) = assign a e in sch > s' ->
       infer a e s
   (* | e', MyScheme(i, s') if i not free in a -> *)
   | e, MyScheme(i, s) ->
