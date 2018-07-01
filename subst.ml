@@ -1,5 +1,6 @@
 open Syntax
 
+(* TODO: merge into subst_type *)
 let swap_id ids typ =
   let rec subst_func sc en = match sc with
     | MyTVar i ->
