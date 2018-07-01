@@ -7,19 +7,19 @@ let rec infer a e s : bool =
   match e, s with
   | MyVar(x), s when List.mem (x, s) a ->
       true
-  | e, s' when let (sub, sch) = assign a e in sch > s' ->
+  | e, s' when let (sub, typ) = assign a e in MyType(typ) > s' ->
       infer a e s
   (* | e', MyScheme(i, s') if i not free in a -> *)
   | e, MyScheme(i, s) ->
       infer a e s
   | MyApply(e, e'), t ->
-      let MyType(MyFunc(t', t)) = assign a e in
-      infer a e (MyType(MyFunc(t', t))) && infer a e' (MyType(t'))
-  | MyLambda(x, e), MyType(MyFunc(t', t)) ->
-      infer ((x, MyType(t')) :: a) e (MyType(t))
-  | MyDefine(x, e, e'), t ->
-      let s = assign a e in
-      infer a e s && infer ((x, s) :: a) e' t
+      let (sub, MyFunc(typ', typ)) = assign a e in
+      infer a e (MyType(MyFunc(typ', typ))) && infer a e' (MyType(typ'))
+  | MyLambda(x, e), MyType(MyFunc(typ', typ)) ->
+      infer ((x, MyType(typ')) :: a) e (MyType(typ))
+  | MyDefine(x, e, e'), typ ->
+      let (sub, typ') = assign a e in
+      infer a e (MyType(typ')) && infer ((x, s) :: a) e' typ
   | _, _ ->
       false
 ;;
