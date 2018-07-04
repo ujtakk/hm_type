@@ -1,4 +1,5 @@
 open Syntax
+open Show
 open Subst
 open Unify
 
@@ -8,7 +9,7 @@ let rec lookup env var = match env with
   | [] ->
       None
   | (id, sch) :: rest ->
-      if id == var then
+      if id = var then
         Some sch
       else
         lookup rest var
@@ -35,9 +36,9 @@ let new_tvar a =
           match sch with
           | MyType(MyTVar(x)) ->
               let cur_tvar = tvar_dict idx in
-              if x == cur_tvar then idx+1 else idx
+              if x = cur_tvar then idx+1 else idx
           | MyType(MyBool) ->
-              0
+              idx
           | MyType(MyList(x)) ->
               next_tvar (MyType(x)) idx
           | MyType(MyFunc(s, t)) ->
@@ -53,20 +54,25 @@ let new_tvar a =
 ;;
 
 (* TODO: (my_sub * my_type) option *)
-(* val assign : my_env -> my_expr -> (my_sub * my_type) *)
-let rec assign (a : my_env) (e : my_expr) : my_sub * my_type = match e with
-  | MyVar(x) when lookup a x != None ->
-      let Some(s) = lookup a x in
-      let t =
-        let rec annotate acc = function
-          | MyType t -> swap_id acc t
-          | MyScheme(j, s') ->
-              let j' = new_tvar a in
-              annotate ((j, j') :: acc) s'
-        in
-        annotate [] s
-      in
-      ([], t)
+let rec assign (a : my_env) (e : my_expr) : my_sub * my_type =
+  Printf.printf "%s |- %s\n" (show_env a) (show_expr e);
+  match e with
+  | MyVar(x) ->
+      begin match lookup a x with
+      | Some s ->
+          let t =
+            let rec annotate acc = function
+              | MyType t -> swap_id acc t
+              | MyScheme(j, s') ->
+                  let j' = new_tvar a in
+                  annotate ((j, j') :: acc) s'
+            in
+            annotate [] s
+          in
+          ([], t)
+      | None ->
+          raise Type_assignment_failed
+      end
   | MyApply(e1, e2) ->
       let (s1, t1) = assign a e1 in
       let (s2, t2) = assign (subst_env s1 a) e2 in
@@ -81,7 +87,5 @@ let rec assign (a : my_env) (e : my_expr) : my_sub * my_type = match e with
       let (s1, t1) = assign a e1 in
       let (s2, t2) = assign ((x, MyType(t1)) :: (subst_env s1 a)) e2 in
       (s1 @ s2, t2)
-  | _ ->
-      raise Type_assignment_failed
 ;;
 

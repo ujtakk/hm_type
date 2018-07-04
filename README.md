@@ -11,3 +11,7 @@ For my study.
     Principal type-schemes for functional programs,
     In Proceedings of POPL, 1982.
 
+[2] J. A. Robinson,
+    A Machine-Oriented Logic Based on the Resolution Principle,
+    In Journal of the ACM, 1965.
+

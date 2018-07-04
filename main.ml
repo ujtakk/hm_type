@@ -1,8 +1,11 @@
 open Syntax
+open Show
 open Assign
 open Infer
 
-let default_env = []
+let default_env = [
+  ("not", MyType(MyFunc(MyBool, MyBool)))
+]
 ;;
 
 (*
@@ -18,8 +21,8 @@ let () =
 *)
 
 let () =
-  let a = MyVar("a") in
-  let b = MyVar("b") in
+  let a = MyVar("not") in
+  let b = MyVar("x") in
   let e = MyLambda("x", MyApply(a, b)) in
   let (_, t) = assign default_env e in
   t |> show_type |> print_endline

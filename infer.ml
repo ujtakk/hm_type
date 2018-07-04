@@ -1,4 +1,5 @@
 open Syntax
+open Show
 open Assign
 
 (* my_env -> my_expr -> my_scheme -> bool *)
