@@ -34,19 +34,19 @@ let new_tvar a =
     | (i, s) :: iss ->
         let rec next_tvar sch idx =
           match sch with
-          | MyType(MyTVar(x)) ->
+          | Scheme(j, s) ->
+              next_tvar s idx
+          | Type(TVar(x)) ->
               let cur_tvar = tvar_dict idx in
               if x = cur_tvar then idx+1 else idx
-          | MyType(MyBool) ->
-              idx
-          | MyType(MyList(x)) ->
-              next_tvar (MyType(x)) idx
-          | MyType(MyFunc(s, t)) ->
-              let idx_s = next_tvar (MyType(s)) idx in
-              let idx_t = next_tvar (MyType(t)) idx_s in
+          | Type(List(x)) ->
+              next_tvar (Type(x)) idx
+          | Type(Func(s, t)) ->
+              let idx_s = next_tvar (Type(s)) idx in
+              let idx_t = next_tvar (Type(t)) idx_s in
               idx_t
-          | MyScheme(j, s) ->
-              next_tvar s idx
+          | Type(_) ->
+              idx
         in
         dive_dict (next_tvar s idx) iss
   in
@@ -57,13 +57,13 @@ let new_tvar a =
 let rec assign (a : my_env) (e : my_expr) : my_sub * my_type =
   Printf.printf "%s |- %s\n" (show_env a) (show_expr e);
   match e with
-  | MyVar(x) ->
+  | Var(x) ->
       begin match lookup a x with
       | Some s ->
           let t =
             let rec annotate acc = function
-              | MyType t -> swap_id acc t
-              | MyScheme(j, s') ->
+              | Type t -> swap_id acc t
+              | Scheme(j, s') ->
                   let j' = new_tvar a in
                   annotate ((j, j') :: acc) s'
             in
@@ -73,19 +73,19 @@ let rec assign (a : my_env) (e : my_expr) : my_sub * my_type =
       | None ->
           raise Type_assignment_failed
       end
-  | MyApply(e1, e2) ->
+  | Apply(e1, e2) ->
       let (s1, t1) = assign a e1 in
       let (s2, t2) = assign (subst_env s1 a) e2 in
-      let b = MyTVar(new_tvar a) in
-      let v = unify (subst_type s2 t1) (MyFunc(t2, b)) in
+      let b = TVar(new_tvar a) in
+      let v = unify (subst_type s2 t1) (Func(t2, b)) in
       (s1 @ s2 @ v, subst_type v b)
-  | MyLambda(x, e1) ->
-      let b = MyTVar(new_tvar a) in
-      let (s1, t1) = assign ((x, MyType(b)) :: a) e1 in
-      (s1, MyFunc((subst_type s1 b), t1))
-  | MyDefine(x, e1, e2) ->
+  | Lambda(x, e1) ->
+      let b = TVar(new_tvar a) in
+      let (s1, t1) = assign ((x, Type(b)) :: a) e1 in
+      (s1, Func((subst_type s1 b), t1))
+  | Define(x, e1, e2) ->
       let (s1, t1) = assign a e1 in
-      let (s2, t2) = assign ((x, MyType(t1)) :: (subst_env s1 a)) e2 in
+      let (s2, t2) = assign ((x, Type(t1)) :: (subst_env s1 a)) e2 in
       (s1 @ s2, t2)
 ;;
 
