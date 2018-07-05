@@ -4,14 +4,16 @@ open Assign
 open Infer
 
 let default_env = [
-  (* ("true", Type(Bool));  *)
+  (* ("true", Type(Bool)); *)
   (* ("false", Type(Bool)); *)
+  ("zero", Type(Int));
   ("nat", Type(List(Int)));
-  ("first", Type(Func(List(Int), Int)));
+  ("head", Type(Func(List(Int), Int)));
+  ("tail", Type(Func(List(Int), List(Int))));
   (* ("not", Type(Func(Bool, Bool))); *)
-  ("is_even", Type(Func(Int, Bool)));
+  ("even", Type(Func(Int, Bool)));
   (* ("succ", Type(Func(Int, Int))); *)
-  (* ("add", Type(Func(Int, Func(Int, Int)))); *)
+  ("add", Type(Func(Int, Func(Int, Int))));
   (* ("equal", Type(Func(Int, Func(Int, Bool)))); *)
   (* ("map", Type(Func(Func(Func(TVar("'a"), TVar("'b")), List(TVar("'a"))), List(TVar("'b"))))); *)
 ]
@@ -29,9 +31,7 @@ let () =
 ;;
 *)
 
-let () =
-  let e = Apply(Var("is_even"), Apply(Var("first"), Var("nat"))) in
-
+let check e =
   let (_, t) = assign default_env e in
   print_endline ("assigned to "^(show_type t));
 
@@ -39,4 +39,22 @@ let () =
     print_endline "infered as valid type"
   else
     print_endline "infered as invalid type"
+;;
+
+let () =
+  Apply(Var("even"), Apply(Var("head"), Var("nat"))) |> check;
+  print_newline ();
+  let e =
+    Define("add2",
+           Lambda("x",
+                  Apply(Apply(Var("add"),
+                              Apply(Var("head"),
+                                    Apply(Var("tail"),
+                                          Var("nat")))),
+                        Var("x"))),
+           Apply(Var("add2"),
+                 Var("zero")))
+  in
+  let (_, t) = assign default_env e in
+  t |> show_type |> print_endline;
 ;;
