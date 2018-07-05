@@ -12,7 +12,7 @@ let rec show_expr_verbose = function
 
 let rec show_expr_simple = function
   | Var(x) -> x
-  | Apply(f, x) -> (show_expr_simple f)^" "^(show_expr_simple x)
+  | Apply(f, x) -> "("^(show_expr_simple f)^" "^(show_expr_simple x)^")"
   | Lambda(x, e) -> "\\"^x^".("^(show_expr_simple e)^")"
   | Define(a, b, c) ->
       "let "^a^" = "^(show_expr_simple b)^" in "^(show_expr_simple c)
