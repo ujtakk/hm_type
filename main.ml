@@ -31,6 +31,12 @@ let () =
 
 let () =
   let e = Apply(Var("is_even"), Apply(Var("first"), Var("nat"))) in
+
   let (_, t) = assign default_env e in
-  t |> show_type |> print_endline
+  print_endline ("assigned to "^(show_type t));
+
+  if infer default_env e (Type(t)) then
+    print_endline "infered as valid type"
+  else
+    print_endline "infered as invalid type"
 ;;
