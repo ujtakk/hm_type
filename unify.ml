@@ -38,17 +38,12 @@ let disagree ts =
   List.map child ts |> iter
 ;;
 
-let rec occur v u =
-  match v with
-  | TVar x ->
-      begin match u with
-      | TVar y -> x = y
-      | List t -> occur v t
-      | Func(s, t) -> occur v s || occur v t
-      | _ -> false
-      end
-  | _ ->
-      raise (Not_unifiable "occur: v is not TVar")
+let rec occur v u = match v, u with
+  | TVar x, TVar y -> x = y
+  | TVar x, List t -> occur v t
+  | TVar x, Func(s, t) -> occur v s || occur v t
+  | TVar x, _ -> false
+  | _, _ -> raise (Not_unifiable "occur: v is not TVar")
 ;;
 
 let unify t t' : my_sub =
