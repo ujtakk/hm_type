@@ -55,7 +55,6 @@ let unify t t' : my_sub =
     else
       match disagree (init' :: goal' :: []) with
       | v :: u :: _ ->
-          (* TODO: more complete way of matching *)
           begin match v, u with
           | TVar x, _ when not (occur v u) ->
               unify_iter ((v, u) :: subs) init goal
