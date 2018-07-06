@@ -5,12 +5,13 @@ open Subst
 exception Not_unifiable of string
 
 let disagree ts =
-  let child p =
+  let rec child p =
     match p with
     | TVar x -> [TVar x]
     | List t -> [t]
-    | Func(s, t) ->
-        [s; t]
+    (* | List t -> child t *)
+    | Func(s, t) -> [s; t]
+    (* | Func(s, t) -> (child s) @ (child t) *)
     | t -> [t]
   in
   let rec iter childs =
@@ -65,8 +66,10 @@ let unify t t' : my_sub =
               unify_iter ((v, u) :: subs) init goal
           | _, TVar x when not (occur u v) ->
               unify_iter ((u, v) :: subs) init goal
-          | _ ->
-              raise (Not_unifiable "v occured in u")
+          | a, b ->
+              let sub' = unify_iter [] a b in
+              unify_iter (sub' @ subs) init goal
+              (* raise (Not_unifiable "v occured in u") *)
           end
       | _ ->
           raise (Not_unifiable "disagree not found")

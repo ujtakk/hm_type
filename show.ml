@@ -52,12 +52,24 @@ let rec show_scheme_simple = function
 
 let show_scheme = if verbose then show_scheme_verbose else show_scheme_simple
 
-let rec show_env_verbose = fun a ->
-  let show_func = function (i, s) -> "("^i^", "^(show_scheme s)^")" in
+let show_sub_verbose = fun a ->
+  let show_func = fun (s, t) -> "("^(show_type s)^", "^(show_type t)^")" in
+  "["^(String.concat "; " @@ List.map show_func a)^"]"
+;;
+
+let show_sub_simple = fun a ->
+  let show_func = fun (s, t) -> (show_type s)^" => "^(show_type t) in
   "["^(String.concat ", " @@ List.map show_func a)^"]"
 ;;
 
-let rec show_env_simple = fun a ->
+let show_sub = if verbose then show_sub_verbose else show_sub_simple
+
+let show_env_verbose = fun a ->
+  let show_func = function (i, s) -> "("^i^", "^(show_scheme s)^")" in
+  "["^(String.concat "; " @@ List.map show_func a)^"]"
+;;
+
+let show_env_simple = fun a ->
   let show_func = function (i, s) -> i^" : "^(show_scheme s) in
   String.concat ", " @@ List.map show_func a
 ;;

@@ -55,7 +55,7 @@ let new_tvar a =
 
 (* TODO: (my_sub * my_type) option *)
 let rec assign (a : my_env) (e : my_expr) : my_sub * my_type =
-  Printf.printf "%s |- %s\n" (show_env a) (show_expr e);
+  (* Printf.printf "%s |- %s\n" (show_env a) (show_expr e); *)
   match e with
   | Var(x) ->
       begin match lookup a x with
@@ -77,6 +77,9 @@ let rec assign (a : my_env) (e : my_expr) : my_sub * my_type =
       let (s1, t1) = assign a e1 in
       let (s2, t2) = assign (subst_env s1 a) e2 in
       let b = TVar(new_tvar a) in
+      Printf.printf "(%s : %s) | (%s : %s)\n"
+        (show_expr e1) (show_type t1)
+        (show_expr e2) (show_type t2);
       let v = unify (subst_type s2 t1) (Func(t2, b)) in
       (s1 @ s2 @ v, subst_type v b)
   | Lambda(x, e1) ->
