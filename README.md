@@ -1,8 +1,6 @@
 Hindley-Milner type system
 ============================================================
 
-WIP
-
 For my study.
 
 # References
